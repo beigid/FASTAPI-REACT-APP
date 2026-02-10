@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Python
+env/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+
+# Misc
+.DS_Store
+*.log

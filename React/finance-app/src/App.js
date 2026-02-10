@@ -1,25 +1,57 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useState, useEffect} from 'react';
+import api from './api'
 
-function App() {
+const App = () => {
+  const [transactions, setTransactions] = useState([])
+  const [formData, setFormData] = useState({
+    amount: '',
+    category: '',
+    description: '',
+    is_income: false,
+    date: ''
+  })
+
+  const fetchTransactions = async () => {
+    const response = await api.get('/transactions')
+    setTransactions(response.data)
+  }
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [])
+
+  const handleInputChange = (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setFormData({
+      ...formData,
+      [e.target.name]: value,
+    });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault()
+    await api.post('/transactions', formData)
+    fetchTransactions();
+    setFormData({
+      amount: '',
+      category: '',
+      description: '',
+      is_income: false,
+      date: ''
+    });
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <nav className='navbar navbar-dark bg-primary'>
+        <div className='container-fluid'>
+          <a className="navbar-brand" href="#">
+            Finance App
+          </a>
+        </div>
+      </nav>
     </div>
-  );
+  )
 }
 
 export default App;
