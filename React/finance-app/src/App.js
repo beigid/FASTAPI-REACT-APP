@@ -50,6 +50,47 @@ const App = () => {
           </a>
         </div>
       </nav>
+      <div className="container">
+        <form onSubmit={handleFormSubmit}>
+          <div className='mb-3 mt-3'>
+            <label htmlFor='amount' className='form-label'>
+              Amount
+            <input type="text" className="form-control" id='amount' name='amount' onChange={handleInputChange} value={formData.amount}/>
+            </label>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='category' className='form-label'>
+              Category
+              <input type="text" className="form-control" id='category' name='category' onChange={handleInputChange} value={formData.category}/>
+            </label>
+          </div>
+
+
+          <div className='mb-3'>
+            <label htmlFor='description' className='form-label'>
+              Description
+              <input type="text" className="form-control" id='description' name='description' onChange={handleInputChange} value={formData.description}/>
+            </label>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='is_income' className='form-label'>
+              Income?
+              <input type="checkbox"  id='is_income' name='is_income' onChange={handleInputChange} value={formData.is_income}/>
+            </label>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='date' className='form-label'>
+              Date
+              <input type="text"  id='date' name='date' onChange={handleInputChange} value={formData.date}/>
+            </label>
+          </div>
+
+          <button type='submit' className='btn btn-primary'> Submit </button>
+        </form>
+      </div>
     </div>
   )
 }
