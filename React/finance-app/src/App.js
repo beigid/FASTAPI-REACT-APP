@@ -45,7 +45,7 @@ const App = () => {
     <div>
       <nav className='navbar navbar-dark bg-primary'>
         <div className='container-fluid'>
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             Finance App
           </a>
         </div>
@@ -90,6 +90,30 @@ const App = () => {
 
           <button type='submit' className='btn btn-primary'> Submit </button>
         </form>
+
+        <table className={'table table-striped table-bordered table-hover'}>
+          <thead
+          >
+          <tr>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Income</th>
+            <th>Date</th>
+          </tr>
+          </thead>
+          <tbody>
+          {transactions.map((transaction, index) => (
+            <tr key={index}>
+              <td>{transaction.amount}</td>
+              <td>{transaction.category}</td>
+              <td>{transaction.description}</td>
+              <td>{transaction.is_income ? 'True' : 'False'}</td>
+              <td>{transaction.date}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
