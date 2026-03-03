@@ -90,3 +90,20 @@ body {
 .table-hover tbody tr:hover {
     background: rgba(142, 45, 226, 0.04);
 }
+
+.delete-btn {
+    padding: 2px 8px;
+}
+
+.action-cell {
+    width: 40px;
+}
+
+.delete-icon-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #dc3545;
+    cursor: pointer;
+}
+

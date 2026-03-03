@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import api from '../api';
 
 const formatMoney = (n) => {
@@ -27,7 +28,7 @@ const Transactions = ({ token }) => {
     category: '',
     description: '',
     is_income: false,
-    date: '' // should be YYYY-MM-DD for <input type="date">
+    date: ''
   });
 
   const headers = useMemo(
@@ -62,7 +63,7 @@ const Transactions = ({ token }) => {
     e.preventDefault();
     try {
       await api.post('/transactions', formData, { headers });
-
+      toast.success("Transaction created!");
       await fetchTransactions();
 
       setFormData({
@@ -73,7 +74,23 @@ const Transactions = ({ token }) => {
         date: ''
       });
     } catch (error) {
-      console.error('Failed to post', error);
+      console.error('Failed to create transaction', error);
+    }
+  };
+
+  const deleteTransaction = async (transaction) => {
+    const confirmed = window.confirm(
+      `Delete "${transaction.description || transaction.category}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const res = await api.delete(`/transactions/${transaction.id}`, { headers });
+      await fetchTransactions();
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error("Something went wrong deleting this transaction.");
     }
   };
 
@@ -104,7 +121,6 @@ const Transactions = ({ token }) => {
 
   return (
     <div className="container py-4">
-      {/* Summary row (sets you up for Budget later) */}
       <div className="row g-3 mb-3">
         <div className="col-12 col-lg-8">
           <div className="card border-0 shadow-sm">
@@ -218,9 +234,6 @@ const Transactions = ({ token }) => {
                     onChange={handleInputChange}
                     value={formData.date}
                   />
-                  <div className="form-text">
-                    This is what we’ll use later to filter/group by month.
-                  </div>
                 </div>
 
                 <div className="d-flex align-items-center justify-content-between mb-3">
@@ -274,6 +287,7 @@ const Transactions = ({ token }) => {
                     <th>Description</th>
                     <th style={{ width: 160 }}>Category</th>
                     <th className="text-end" style={{ width: 140 }}>Amount</th>
+                    <th style={{ width: 80 }}></th>
                   </tr>
                   </thead>
                   <tbody>
@@ -293,6 +307,14 @@ const Transactions = ({ token }) => {
                       </td>
                       <td className={`text-end fw-semibold ${t.is_income ? 'text-success' : 'text-danger'}`}>
                         {t.is_income ? '+' : '-'}{formatMoney(t.amount)}
+                      </td>
+                      <td className="text-end action-cell">
+                        <button
+                          className="delete-icon-btn"
+                          onClick={() => deleteTransaction(t)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
                       </td>
                     </tr>
                   ))}

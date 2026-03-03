@@ -90,7 +90,17 @@ async def create_transaction(transaction: TransactionBase, db: db_dependency, cu
   db.refresh(db_transaction)
   return db_transaction
 
+@app.delete("/transactions/{transaction_id}")
+async def delete_transaction(db: db_dependency, transaction_id: int, current_user: user_dependency):
+  transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id, models.Transaction.user_id == current_user.id).first()
+  if not transaction:
+    raise HTTPException(status_code=404, detail="Transaction cannot be found")
+  db.delete(transaction)
+  db.commit()
+  return {"message": "Transaction deleted successfully"}
+
 @app.get("/transactions/", response_model=List[TransactionModel])
 async def read_transactions(db: db_dependency, current_user: user_dependency, skip: int = 0, limit: int = 100):
   transactions = db.query(models.Transaction).filter(models.Transaction.user_id == current_user.id).offset(skip).limit(limit).all()
   return transactions
+
