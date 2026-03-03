@@ -5,6 +5,10 @@ from pydantic import BaseModel
 from database import SessionLocal, engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
+from auth import get_current_user, create_access_token, hash_password, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+
 
 app = FastAPI()
 origins = [
@@ -29,8 +33,17 @@ class TransactionBase(BaseModel):
 
 class TransactionModel(TransactionBase):
   id: int
+  user_id: int
   class Config:
-    orm_mode = True
+    from_attributes = True
+
+class UserCreate(BaseModel):
+  username: str
+  password: str
+
+class Token(BaseModel):
+  access_token: str
+  token_type: str
 
 def get_db():
   db = SessionLocal()
@@ -40,18 +53,44 @@ def get_db():
     db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+user_dependency = Annotated[models.User, Depends(get_current_user)]
 
 models.Base.metadata.create_all(bind=engine)
 
+@app.post("/auth/register")
+async def register(user: UserCreate, db: db_dependency):
+  existing_user = db.query(models.User).filter(models.User.username == user.username).first()
+  if existing_user:
+    raise HTTPException(status_code=400, detail="Username already registered")
+  db_user = models.User(
+    username=user.username,
+    hashed_password=hash_password(user.password)
+  )
+  db.add(db_user)
+  db.commit()
+  db.refresh(db_user)
+  return {"message": "User created successfully"}
+
+@app.post("/auth/token", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: db_dependency = None):
+  user = db.query(models.User).filter(models.User.username == form_data.username).first()
+  if not user or not verify_password(form_data.password, user.hashed_password):
+    raise HTTPException(status_code=401, detail="Incorrect username or password")
+  access_token = create_access_token(
+    data={"sub": user.username},
+    expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+  )
+  return {"access_token": access_token, "token_type": "bearer"}
+
 @app.post("/transactions/", response_model=TransactionModel)
-async def create_transaction(transaction: TransactionBase, db: db_dependency):
-  db_transaction = models.Transaction(**transaction.dict())
+async def create_transaction(transaction: TransactionBase, db: db_dependency, current_user: user_dependency):
+  db_transaction = models.Transaction(**transaction.dict(), user_id=current_user.id)
   db.add(db_transaction)
   db.commit()
   db.refresh(db_transaction)
   return db_transaction
 
 @app.get("/transactions/", response_model=List[TransactionModel])
-async def read_transactions(db: db_dependency, skip: int = 0, limit: int = 100):
-  transactions = db.query(models.Transaction).offset(skip).limit(limit).all()
+async def read_transactions(db: db_dependency, current_user: user_dependency, skip: int = 0, limit: int = 100):
+  transactions = db.query(models.Transaction).filter(models.Transaction.user_id == current_user.id).offset(skip).limit(limit).all()
   return transactions
