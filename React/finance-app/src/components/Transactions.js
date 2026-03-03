@@ -40,7 +40,7 @@ const Transactions = ({ token }) => {
     if (!token) return;
 
     try {
-      const response = await api.get('/transactions', { headers });
+      const response = await api.get('/transactions/', { headers });
       setTransactions(response.data || []);
     } catch (error) {
       console.error('Failed to fetch', error);
@@ -62,7 +62,7 @@ const Transactions = ({ token }) => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/transactions', formData, { headers });
+      await api.post('/transactions/', formData, { headers });
       toast.success("Transaction created!");
       await fetchTransactions();
 
