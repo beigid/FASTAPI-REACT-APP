@@ -5,6 +5,7 @@ import api from "../api";
 const Register = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -14,9 +15,11 @@ const Register = ({ onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
       await api.post("/auth/register", formData);
+
       const loginData = new FormData();
       loginData.append('username', formData.username);
       loginData.append('password', formData.password);
@@ -26,57 +29,101 @@ const Register = ({ onLoginSuccess }) => {
 
       localStorage.setItem('token', token);
       onLoginSuccess(token);
-
       navigate('/');
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || "Registration failed. Try a different username.";
+      const errorMessage =
+        err.response?.data?.detail ||
+        "Registration failed. Try a different username.";
       setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2>Register</h2>
+    <div className="min-vh-100 d-flex align-items-center py-5">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+            <div className="card shadow-lg border-0 login-card">
+              <div className="card-body p-4 p-md-5">
+                <div className="text-center mb-4">
+                  <h2 className="h4 mb-1">Create Your Account</h2>
+                  <p className="text-muted mb-0">
+                    Start managing your finances today
+                  </p>
+                </div>
 
-        {error && <p style={styles.error}>{error}</p>}
+                {error && (
+                  <div className="alert alert-danger py-2" role="alert">
+                    {error}
+                  </div>
+                )}
 
-        <input
-          name="username"
-          placeholder="Username"
-          onChange={handleInputChange}
-          style={styles.input}
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          onChange={handleInputChange}
-          style={styles.input}
-          required
-        />
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label className="form-label">Username</label>
+                    <input
+                      name="username"
+                      className="form-control"
+                      placeholder="Choose a username"
+                      onChange={handleInputChange}
+                      value={formData.username}
+                      autoComplete="username"
+                      required
+                    />
+                  </div>
 
-        <button type="submit" style={styles.button}>
-        Create Account
-        </button>
+                  <div className="mb-4">
+                    <label className="form-label">Password</label>
+                    <input
+                      name="password"
+                      type="password"
+                      className="form-control"
+                      placeholder="Create a password"
+                      onChange={handleInputChange}
+                      value={formData.password}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
 
-        <p>
-          Already have an account? <Link to="/login">Login here</Link>
-        </p>
-      </form>
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-100 fw-semibold"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Creating account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
+                  </button>
+                </form>
+
+                <div className="text-center mt-3">
+                  <span className="text-muted">Already have an account?</span>{" "}
+                  <Link
+                    to="/login"
+                    className="link-primary text-decoration-none"
+                  >
+                    Log in
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-center text-muted small mt-3 mb-0">
+              © {new Date().getFullYear()} Your Personal Finance App
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-// Simple inline styles to get you started
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f7f6' },
-  form: { padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '300px' },
-  input: { width: '100%', padding: '10px', margin: '10px 0', borderRadius: '4px', border: '1px solid #ddd', boxSizing: 'border-box' },
-  button: { width: '100%', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  toggle: { fontSize: '0.8rem', textAlign: 'center', color: '#007bff', cursor: 'pointer', marginTop: '15px' },
-  error: { color: 'red', fontSize: '0.9rem' }
 };
 
 export default Register;

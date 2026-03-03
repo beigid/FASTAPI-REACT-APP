@@ -4,6 +4,7 @@ import Register from './components/Register';
 import Transactions from './components/Transactions';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
+import './App.css';
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -20,6 +21,7 @@ const App = () => {
 
   return (
     <Router>
+      <div className="app-background">
       <Navbar token={token} onLogout={handleLogout} />
       <Routes>
         <Route path="/login"
@@ -34,6 +36,7 @@ const App = () => {
          element={token ? <Transactions token={token} onLogout={handleLogout} /> : <Navigate to="/login" />}
         />
       </Routes>
+      </div>
     </Router>
   );
 }
