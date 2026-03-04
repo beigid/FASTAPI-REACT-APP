@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 class Transaction(Base):
@@ -23,3 +23,15 @@ class User(Base):
   hashed_password = Column(String)
 
   transactions = relationship("Transaction", back_populates="owner")
+
+class Budget(Base):
+  __tablename__ = 'budgets'
+
+  id = Column(Integer, primary_key=True, index=True)
+  user_id = Column(Integer, ForeignKey("users.id"))
+  amount = Column(Float)
+  month = Column(Integer)
+  year = Column(Integer)
+
+  __table_args__ = (UniqueConstraint('user_id', 'month', 'year'),)
+
