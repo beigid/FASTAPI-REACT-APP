@@ -140,7 +140,7 @@ async def delete_budget(db: db_dependency, current_user: user_dependency, budget
   db.commit()
   return {"message": "Budget deleted successfully"}
 
-@app.get("/budget/", response_model=List[BudgetModel] | None)
+@app.get("/budget/", response_model=BudgetModel | None)
 async def get_budget(db: db_dependency, current_user: user_dependency, month: int, year: int):
   budget = db.query(models.Budget).filter(models.Budget.user_id == current_user.id, models.Budget.year == year,
                                           models.Budget.month == month).first()
