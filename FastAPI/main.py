@@ -45,6 +45,17 @@ class Token(BaseModel):
   access_token: str
   token_type: str
 
+class BudgetBase(BaseModel):
+  amount: float
+  month: int
+  year: int
+
+class BudgetModel(BudgetBase):
+  user_id: int
+  id: int
+  class Config:
+    from_attributes = True
+
 def get_db():
   db = SessionLocal()
   try:
@@ -103,4 +114,37 @@ async def delete_transaction(db: db_dependency, transaction_id: int, current_use
 async def read_transactions(db: db_dependency, current_user: user_dependency, skip: int = 0, limit: int = 100):
   transactions = db.query(models.Transaction).filter(models.Transaction.user_id == current_user.id).offset(skip).limit(limit).all()
   return transactions
+
+@app.post("/budget/", response_model=BudgetModel)
+async def create_budget(budget: BudgetBase, db: db_dependency, current_user: user_dependency):
+  existing = db.query(models.Budget).filter(
+    models.Budget.user_id == current_user.id,
+    models.Budget.month == budget.month,
+    models.Budget.year == budget.year
+  ).first()
+  if existing:
+    raise HTTPException(status_code=400, detail="Budget already exists for this month")
+  db_budget = models.Budget(**budget.dict(), user_id=current_user.id)
+  db.add(db_budget)
+  db.commit()
+  db.refresh(db_budget)
+  return db_budget
+
+@app.delete("/budget/{budget_id}")
+async def delete_budget(db: db_dependency, current_user: user_dependency, budget_id: int):
+  budget = db.query(models.Budget).filter(models.Budget.user_id == current_user.id, models.Budget.id ==
+                                          budget_id).first()
+  if not budget:
+    raise HTTPException(status_code=404, detail="Transaction cannot be found")
+  db.delete(budget)
+  db.commit()
+  return {"message": "Budget deleted successfully"}
+
+@app.get("/budget/", response_model=List[BudgetModel] | None)
+async def get_budget(db: db_dependency, current_user: user_dependency, month: int, year: int):
+  budget = db.query(models.Budget).filter(models.Budget.user_id == current_user.id, models.Budget.year == year,
+                                          models.Budget.month == month).first()
+  return budget
+
+
 
