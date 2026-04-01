@@ -1,13 +1,30 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, UniqueConstraint
+from enum import Enum
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, UniqueConstraint, Enum as TypeEnum
 from sqlalchemy.orm import relationship
+
+class TransactionCategory(str, Enum):
+  housing = "housing"
+  utilities = "utilities"
+  food = "food"
+  transportation = "transportation"
+  entertainment = "entertainment"
+  shopping = "shopping"
+  personal_care = "personal_care"
+  health = "health"
+  travel = "travel"
+  subscriptions = "subscriptions"
+  education = "education"
+  financial = "financial"
+  income = "income"
+  other = "other"
 
 class Transaction(Base):
   __tablename__ = 'transactions'
 
   id = Column(Integer, primary_key=True, index=True)
   amount = Column(Float)
-  category = Column(String)
+  category = Column(TypeEnum(TransactionCategory), nullable=False, default=TransactionCategory.other)
   description = Column(String)
   is_income = Column(Boolean)
   date = Column(String)

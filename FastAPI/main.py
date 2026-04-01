@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from typing import Annotated, List
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from models import TransactionCategory
 from database import SessionLocal, engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,10 +27,21 @@ app.add_middleware(
 
 class TransactionBase(BaseModel):
   amount: float
-  category: str
+  category: TransactionCategory
   description: str
   is_income: bool
   date: str
+
+  model_config = {
+    "use_enum_values": True
+  }
+
+  @field_validator('category', mode='before')
+  @classmethod
+  def ensure_lowercase(cls, v):
+    if isinstance(v, str):
+      return v.lower()
+    return v
 
 class TransactionModel(TransactionBase):
   id: int
@@ -65,8 +77,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[models.User, Depends(get_current_user)]
-
-models.Base.metadata.create_all(bind=engine)
 
 @app.post("/auth/register")
 async def register(user: UserCreate, db: db_dependency):

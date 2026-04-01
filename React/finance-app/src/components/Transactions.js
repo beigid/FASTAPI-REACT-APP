@@ -4,6 +4,13 @@ import api from '../api';
 import Budget from './Budget';
 import MonthSelector from './MonthSelector';
 
+const CATEGORIES = [
+  "housing", "utilities", "food", "transportation",
+  "entertainment", "shopping", "personal_care", "health",
+  "travel", "subscriptions", "education", "financial",
+  "income", "other"
+];
+
 const formatMoney = (n) => {
   const num = Number(n || 0);
   return num.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
@@ -22,7 +29,7 @@ const Transactions = ({ token }) => {
 
   const [formData, setFormData] = useState({
     amount: '',
-    category: '',
+    category: 'housing',
     description: '',
     is_income: false,
     date: ''
@@ -164,16 +171,20 @@ const Transactions = ({ token }) => {
                 </div>
                 <div className="mb-3">
                   <label htmlFor="category" className="form-label">Category</label>
-                  <input
-                    type="text"
-                    className="form-control"
+                  <select
+                    className="form-select"
                     id="category"
                     name="category"
                     onChange={handleInputChange}
                     value={formData.category}
-                    placeholder="e.g. Groceries"
                     required
-                  />
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="description" className="form-label">Description</label>
