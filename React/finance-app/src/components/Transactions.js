@@ -157,7 +157,7 @@ const Transactions = ({ token }) => {
                   <div className="input-group">
                     <span className="input-group-text">$</span>
                     <input
-                      type="text"
+                      type="number"
                       className="form-control"
                       id="amount"
                       name="amount"
