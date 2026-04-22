@@ -24,7 +24,7 @@ const App = () => {
   return (
     <Router>
       <div className="app-background">
-        <Navbar token={token} onLogout={handleLogout}/>
+        {token && <Navbar token={token} onLogout={handleLogout} />}
         <Routes>
           <Route path="/login"
                  element={!token ? <Login onLoginSuccess={handleLoginSuccess}/> : <Navigate to="/"/>}

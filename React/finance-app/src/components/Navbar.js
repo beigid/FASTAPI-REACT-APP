@@ -5,7 +5,7 @@ const Navbar = ({ token, onLogout }) => {
     <nav className="navbar navbar-expand-lg navbar-dark custom-navbar shadow-sm">
       <div className="container">
         <Link className="navbar-brand fw-bold" to="/">
-          Your Personal Finance App
+          Finance App
         </Link>
 
         <button
