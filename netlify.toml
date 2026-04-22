@@ -1,0 +1,16 @@
+[build]
+# Directs Netlify to the correct subfolder
+base = "React/finance-app"
+
+# The command to build your specific React project
+command = "npm run build"
+
+# The folder CRA creates (relative to the base directory)
+publish = "build"
+
+[[redirects]]
+# This is the "magic fix" for React Router
+# It ensures that refreshing /login doesn't give a 404
+from = "/*"
+to = "/index.html"
+status = 200
