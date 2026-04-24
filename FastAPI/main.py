@@ -14,7 +14,8 @@ from datetime import timedelta
 app = FastAPI()
 origins = [
   'http://localhost:3001',
-  'https://your-own-finance-app.netlify.app'
+  'https://your-own-finance-app.netlify.app',
+  'https://finance-app.dbeigi.com'
 ]
 
 app.add_middleware(
